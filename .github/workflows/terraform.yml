@@ -1,20 +1,32 @@
-terraform {
-    required_providers {
-        aws = {
-            source = "hashicorp/aws"
-            version = "5.10.0"
-        }
-        }
-    }
-    provider "aws" {
-        region = "ap-south-1"
-        access_key = "AKIA32BP4XBTPJT2B2MN"
-        secret_key = "AQvmskG3h5bXykOwlCJMgaoELhovS0iz1oW2bWUI"
-    }
-    resource "aws_instance" "example" {
-  ami           = "ami-067c21fb1979f0b27" 
-  instance_type = "t2.micro"
-  tags = {
-    "Name" = "Myec2Instance"
-  }
-    }
+name: Terraform Deploy
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  terraform:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Set up Terraform
+        uses: hashicorp/setup-terraform@v1
+
+      - name: Configure AWS credentials
+        run: |
+          echo "AWS_ACCESS_KEY_ID=${{ secrets.AWS_ACCESS_KEY_ID }}" >> $GITHUB_ENV
+          echo "AWS_SECRET_ACCESS_KEY=${{ secrets.AWS_SECRET_ACCESS_KEY }}" >> $GITHUB_ENV
+
+      - name: Initialize Terraform
+        run: terraform init
+
+      - name: Apply Terraform
+        run: terraform apply -auto-approve
+
+      - name: Clean up
+        run: terraform destroy -auto-approve
+        if: always()
