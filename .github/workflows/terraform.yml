@@ -4,9 +4,9 @@ on:
   workflow_dispatch:
     inputs:
       tfpath:
-        description: 'TF File Path'
+        description: 'Ec2Demo.tf'
         required: false
-        default: 'aws_sample/create_ec2'
+        default: 'Ec2Demo.tf'
   push:
     branches:
       - main
