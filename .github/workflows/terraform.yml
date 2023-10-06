@@ -1,51 +1,57 @@
 name: 'Terraform AWS workflow'
+
 on:
-workflow dispatch:
-inputs:
-tfpath:
-description: 'TF File Path'
-required: false
-default: 'aws_sample/create_ec2'
+  workflow_dispatch:
+    inputs:
+      tfpath:
+        description: 'TF File Path'
+        required: false
+        default: 'aws_sample/create_ec2'
   push:
-    branches: [ main ]
+    branches: [main]
   pull_request:
-  branches: [ main ]
+    branches: [main]
 
 jobs:
   tf_code_check:
     name: 'Terraform'
     runs-on: ubuntu-latest
 
-if: ${{ inputs.tfpath }}
-steps:
--uses: actions/checkout@2.5.0
+    if: ${{ inputs.tfpath }}
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v2.5.0
 
--name: Configure AWS Credentials Action For GitHub Actions
-uses: aws-actions/configure-aws-credentials@v1
-with:
-aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY }}
-aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-aws-region: ap-south-1
-- name: Setup Terraform CLI
-uses: hashicorp/setup-terraformm@v2.0.2
+    - name: Configure AWS Credentials Action For GitHub Actions
+      uses: aws-actions/configure-aws-credentials@v1
+      with:
+        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY }}
+        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        aws-region: ap-south-1
 
-- name: Terraform Init, plan and apply
-run:
-echo 'pwd'
-echo "tfpath ${{ github.event.inputs.tfpath }}'
-echo "** Running Terraform Init 88"
-terraform init
+    - name: Setup Terraform CLI
+      uses: hashicorp/setup-terraform@v2.0.2
 
-echo "** Running Terraform Validate **"
-terraform validate
+    - name: Terraform Init, plan and apply
+      run: |
+        echo 'pwd'
+        echo "tfpath ${{ github.event.inputs.tfpath }}"
+        echo "** Running Terraform Init **"
+        terraform init
 
-echo "** Running Terraform Plan **"
-terraform plan
+        echo "** Running Terraform Validate **"
+        terraform validate
 
-working-directory: ${{ github.event.inputs.tfpath }}
-- name: Terraform Destroy
-run:
-echo "** Running Terraform Destroy **"
-terraform plan -destroy
+        echo "** Running Terraform Plan **"
+        terraform plan
 
-working-directory: ${{ github.event.inputs.tfpath }}
+      working-directory: ${{ github.event.inputs.tfpath }}
+
+    - name: Terraform Destroy
+      run: |
+        echo "** Running Terraform Destroy **"
+        terraform plan -destroy
+
+      working-directory: ${{ github.event.inputs.tfpath }}
+
