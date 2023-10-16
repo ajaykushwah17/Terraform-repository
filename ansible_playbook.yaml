@@ -1,8 +1,35 @@
 ---
-- name: Install Apache Tomcat
-  hosts: your_target_group
-  become: yes
+- hosts: localhost
+  gather_facts: no
+  tasks:
+    - name: Install AWS CLI
+      apt:
+        name: awscli
+        state: present
 
+    - name: Configure AWS CLI
+      command: aws configure set aws_access_key_id {{ lookup('env', 'AWS_ACCESS_KEY') }} && aws configure set aws_secret_access_key {{ lookup('env', 'AWS_SECRET_ACCESS_KEY') }} && aws configure set region {{ lookup('env', 'AWS_REGION') }}
+      environment:
+        AWS_ACCESS_KEY: "{{ lookup('env', 'AWS_ACCESS_KEY') }}"
+        AWS_SECRET_ACCESS_KEY: "{{ lookup('env', 'AWS_SECRET_ACCESS_KEY') }}"
+        AWS_REGION: "{{ lookup('env', 'AWS_REGION') }}"
+
+    - name: Fetch EC2 instances dynamic inventory
+      command: aws ec2 describe-instances --query 'Reservations[].Instances[].[PublicIpAddress]' --output text
+      register: ec2_instance_ip
+
+    - name: Create Ansible inventory
+      copy:
+        content: |
+          [ec2_instances]
+          {% for ip in ec2_instance_ip.stdout_lines %}
+          {{ ip }}
+          {% endfor %}
+        dest: /tmp/ec2_inventory
+        mode: '0644'
+
+- hosts: ec2_instances
+  become: yes
   tasks:
     - name: Update apt cache
       apt:
