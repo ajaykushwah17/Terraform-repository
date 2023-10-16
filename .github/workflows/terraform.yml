@@ -44,7 +44,7 @@ jobs:
         run: terraform plan
         working-directory: ${{ github.workspace }}/${{ github.event.inputs.tfpath }}
 
-      name: Install Ansible
+      - name: Install Ansible
         run: |
           sudo apt update
           sudo apt install ansible
@@ -54,4 +54,3 @@ jobs:
         env:
           ANSIBLE_HOST_KEY_CHECKING: False # Disable host key checking
         # Replace "ec2_instance_ip" with the actual IP of your EC2 instance
-
