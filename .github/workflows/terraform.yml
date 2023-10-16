@@ -6,7 +6,7 @@ on:
       tfpath:
         description: 'Terraform Configuration Path'
         required: false
-        default: 'aws_sample/create_ec2'
+        default: 'Ec2Demo.tf'  # Update to match the name of your Terraform script
   push:
     branches:
       - main
@@ -34,21 +34,21 @@ jobs:
 
       - name: Terraform Init
         run: terraform init
-        working-directory: ${{ github.workspace }}/${{ github.event.inputs.tfpath }}
+        working-directory: ${{ github.workspace }}
 
       - name: Terraform Validate
         run: terraform validate
-        working-directory: ${{ github.workspace }}/${{ github.event.inputs.tfpath }}
+        working-directory: ${{ github.workspace }}
 
       - name: Terraform Plan
-        run: terraform plan
-        working-directory: ${{ github.workspace }}/${{ github.event.inputs.tfpath }}
+        run: terraform plan -var-file=vars.tfvars  # Use your variable file if needed
+        working-directory: ${{ github.workspace }}
 
       - name: Install Ansible
         run: sudo apt update && sudo apt install -y ansible
 
       - name: Run Ansible Playbook
         run: |
-          ansible-playbook -i ec2_instance_ip, ansible_playbook.yml
+          ansible-playbook -i localhost, ansible_playbook.yml
         env:
           ANSIBLE_HOST_KEY_CHECKING: False # Disable host key checking
