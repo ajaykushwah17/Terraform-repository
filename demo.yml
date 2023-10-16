@@ -1,4 +1,0 @@
-- name: Run Ansible Playbook
-  run: ansible-playbook -i ${{ github.workspace }}/playbook.yml
-  env:
-    ANSIBLE_HOST_KEY_CHECKING: False
