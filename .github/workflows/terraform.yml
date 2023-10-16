@@ -44,6 +44,10 @@ jobs:
         run: terraform plan  # Remove -var-file if not needed
         working-directory: ${{ github.workspace }}
 
+      - name: Terraform Apply
+        run: terraform apply --auto-approve
+        working-directory: ${{ github.workspace }}
+
       - name: Install Ansible
         run: sudo apt update && sudo apt install -y ansible
 
